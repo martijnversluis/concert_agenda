@@ -1,0 +1,130 @@
+<% if signed_in? %>
+  <section class="mb-10 flex items-start justify-between gap-6">
+    <div>
+      <h1 class="text-4xl sm:text-5xl font-black tracking-tight leading-none"
+          style="font-family: 'Fraunces', serif;">
+        Aankomende shows
+      </h1>
+      <p class="mt-3 text-neutral-400 max-w-xl">
+        Concerten in Nederland van jouw Spotify-artiesten, met tips voor bands die passen bij je smaak.
+      </p>
+    </div>
+    <%= link_to artists_path,
+          class: "text-sm text-neutral-400 hover:text-white transition
+                  border border-white/10 rounded-full px-3 py-1.5 whitespace-nowrap" do %>
+      Beheer artiesten →
+    <% end %>
+  </section>
+
+  <% if syncing? %>
+    <div class="mb-6 rounded-lg bg-white/[0.03] border border-white/10 px-4 py-3 flex items-center gap-3 text-sm text-neutral-300">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+      Concerten worden opgehaald… pagina ververst automatisch.
+    </div>
+    <meta http-equiv="refresh" content="8">
+  <% end %>
+
+  <% if @rows_by_month.blank? %>
+    <% unless syncing? %>
+      <div class="rounded-xl bg-white/[0.03] border border-white/10 p-8 text-neutral-400">
+        <p class="text-neutral-200 font-medium mb-2">Nog geen shows gevonden.</p>
+        <p class="text-sm">Check <%= link_to "Beheer artiesten", artists_path, class: "underline hover:text-white" %> om je lijst te bekijken, of verberg artiesten die je niet in de agenda wilt zien.</p>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="space-y-10">
+      <% @rows_by_month.each do |month, rows| %>
+        <section>
+          <h2 class="text-xs uppercase tracking-[0.2em] text-neutral-500 mb-4">
+            <%= month.strftime("%B %Y") %>
+          </h2>
+          <ul class="divide-y divide-white/5 rounded-xl bg-white/[0.03] border border-white/10 overflow-hidden">
+            <% rows.each do |row| %>
+              <% concert = row.concert %>
+              <% artist_record = concert.artist %>
+              <% show_name = concert.tribute? && concert.cover_band_name.present? ? concert.cover_band_name : concert.artist_name %>
+              <% spotify_link_id = !concert.tribute? && artist_record&.spotify_id.present? && !artist_record.spotify_id.start_with?("manual:") ? artist_record.spotify_id : nil %>
+              <li class="<%= 'bg-purple-500/[0.05]' if row.tip %>">
+                <div class="flex items-center gap-4 p-4 hover:bg-white/[0.04] transition">
+                  <div class="w-14 text-center shrink-0">
+                    <div class="text-[10px] uppercase tracking-widest <%= row.tip ? 'text-purple-300/70' : 'text-neutral-500' %>">
+                      <%= concert.starts_on.strftime("%a") %>
+                    </div>
+                    <div class="text-2xl font-bold leading-none tabular-nums" style="font-family: 'Fraunces', serif;">
+                      <%= concert.starts_on.day %>
+                    </div>
+                    <div class="text-[10px] uppercase tracking-widest <%= row.tip ? 'text-purple-300/70' : 'text-neutral-500' %> mt-0.5">
+                      <%= concert.starts_on.strftime("%b") %>
+                    </div>
+                  </div>
+
+                  <% if concert.image_url.present? %>
+                    <%= image_tag concert.image_url,
+                          class: "hidden sm:block w-16 h-16 rounded-md object-cover shrink-0" %>
+                  <% end %>
+
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <% if spotify_link_id %>
+                        <%= link_to show_name,
+                              "https://open.spotify.com/artist/#{spotify_link_id}",
+                              target: "_blank", rel: "noopener",
+                              class: "font-semibold truncate hover:text-emerald-300 transition" %>
+                      <% else %>
+                        <span class="font-semibold truncate"><%= show_name %></span>
+                      <% end %>
+                      <% if concert.tribute? %>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded
+                                     bg-amber-400/15 text-amber-200 border border-amber-400/30 whitespace-nowrap">
+                          Tribute aan <%= concert.artist_name %>
+                        </span>
+                      <% elsif row.tip %>
+                        <span class="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded
+                                     bg-purple-400/15 text-purple-200 border border-purple-400/30 whitespace-nowrap">
+                          Tip
+                        </span>
+                        <% row.overlap.first(2).each do |genre| %>
+                          <span class="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded
+                                       bg-white/[0.03] text-neutral-400 border border-white/10 whitespace-nowrap">
+                            <%= genre %>
+                          </span>
+                        <% end %>
+                      <% end %>
+                    </div>
+                    <div class="text-sm text-neutral-400 truncate mt-0.5">
+                      <%= concert.venue&.name || concert.title %>
+                      <% if concert.venue&.city.present? %>
+                        · <%= concert.venue.city %>
+                      <% end %>
+                    </div>
+                    <% if row.tip && row.similar_to.present? %>
+                      <div class="text-xs text-purple-300/80 truncate mt-1">
+                        Lijkt op <%= row.similar_to.map(&:name).to_sentence(two_words_connector: " en ", last_word_connector: " en ") %>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <div class="shrink-0 flex items-center gap-3">
+                    <% if concert.price_display %>
+                      <span class="text-xs tabular-nums text-neutral-300"><%= concert.price_display %></span>
+                    <% end %>
+                    <% if concert.url.present? %>
+                      <%= link_to concert.url, target: "_blank", rel: "noopener",
+                            class: "text-xs text-neutral-400 hover:text-white transition
+                                    border border-white/10 hover:border-white/25 rounded-full
+                                    px-3 py-1.5 whitespace-nowrap" do %>
+                        Tickets →
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </section>
+      <% end %>
+    </div>
+  <% end %>
+<% else %>
+  <%= render "shared/hero" %>
+<% end %>

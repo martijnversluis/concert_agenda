@@ -1,0 +1,18 @@
+<turbo-frame id="tracks_<%= @artist_id %>">
+  <% if @tracks.any? %>
+    <ol class="mt-2 space-y-1 text-sm">
+      <% @tracks.each_with_index do |t, i| %>
+        <li>
+          <%= link_to t.external_urls["spotify"],
+                target: "_blank", rel: "noopener",
+                class: "flex items-center gap-2 text-neutral-300 hover:text-white truncate" do %>
+            <span class="text-neutral-600 tabular-nums w-4"><%= i + 1 %></span>
+            <span class="truncate"><%= t.name %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% else %>
+    <p class="mt-2 text-xs text-neutral-500">Geen tracks gevonden.</p>
+  <% end %>
+</turbo-frame>

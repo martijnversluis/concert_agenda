@@ -1,0 +1,4 @@
+<%= turbo_stream.remove "top_artist_#{@hidden_artist.spotify_artist_id}" %>
+<%= turbo_stream.append "hidden_list" do %>
+  <%= render "hidden_artists/hidden_artist", hidden_artist: @hidden_artist %>
+<% end %>

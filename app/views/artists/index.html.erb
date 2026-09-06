@@ -1,0 +1,70 @@
+<section class="mb-10 flex items-start justify-between gap-6">
+  <div>
+    <h1 class="text-4xl sm:text-5xl font-black tracking-tight leading-none"
+        style="font-family: 'Fraunces', serif;">
+      Jouw artiesten
+    </h1>
+    <p class="mt-3 text-neutral-400 max-w-xl">
+      Op basis van je Spotify-luistergeschiedenis. Verberg wat je niet in de agenda wilt zien, of voeg zelf artiesten toe.
+    </p>
+  </div>
+  <%= link_to root_path,
+        class: "text-sm text-neutral-400 hover:text-white transition
+                border border-white/10 rounded-full px-3 py-1.5 whitespace-nowrap" do %>
+    ← Agenda
+  <% end %>
+</section>
+
+<div class="mb-8 relative"
+     data-controller="artist-search"
+     data-artist-search-url-value="<%= search_artists_path %>">
+  <%= form_with url: artists_path, method: :post,
+        data: { turbo: false, artist_search_target: "form" },
+        class: "flex gap-2" do |f| %>
+    <%= f.text_field :name,
+          placeholder: "Naam of Spotify-link",
+          autocomplete: "off",
+          data: {
+            artist_search_target: "input",
+            action: "input->artist-search#onInput"
+          },
+          class: "flex-1 bg-white/[0.03] border border-white/10 rounded-lg px-4 py-2.5
+                  text-neutral-100 placeholder-neutral-500
+                  focus:outline-none focus:border-emerald-400/50 focus:bg-white/[0.05]" %>
+    <%= f.submit "Toevoegen",
+          class: "bg-emerald-400 hover:bg-emerald-300 text-neutral-950 font-semibold
+                  px-5 py-2.5 rounded-lg transition cursor-pointer" %>
+  <% end %>
+
+  <div data-artist-search-target="results"
+       class="hidden absolute z-30 top-full left-0 right-0 mt-1
+              bg-neutral-900 border border-white/10 rounded-lg overflow-hidden
+              shadow-xl max-h-96 overflow-y-auto"></div>
+</div>
+
+<% if syncing? && @top_artists.empty? %>
+  <div class="mb-6 rounded-lg bg-white/[0.03] border border-white/10 px-4 py-3 flex items-center gap-3 text-sm text-neutral-300">
+    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+    Je artiesten worden opgehaald… pagina ververst automatisch.
+  </div>
+  <meta http-equiv="refresh" content="8">
+<% elsif @top_artists.present? %>
+  <ul class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+    <% @top_artists.each do |artist| %>
+      <%= render "top_artist", artist: artist %>
+    <% end %>
+  </ul>
+<% else %>
+  <p class="text-neutral-400">Geen artiesten gevonden.</p>
+<% end %>
+
+<section class="mt-16 pt-8 border-t border-white/10 [&:not(:has(li))]:hidden">
+  <h2 class="text-sm font-semibold uppercase tracking-widest text-neutral-500 mb-4">
+    Verborgen
+  </h2>
+  <ul id="hidden_list" class="flex flex-wrap gap-2">
+    <% (@hidden_artists || []).each do |ha| %>
+      <%= render "hidden_artists/hidden_artist", hidden_artist: ha %>
+    <% end %>
+  </ul>
+</section>

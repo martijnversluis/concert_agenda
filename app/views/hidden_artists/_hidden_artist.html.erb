@@ -1,0 +1,16 @@
+<li id="<%= dom_id(hidden_artist) %>">
+  <%= button_to hidden_artist_path(hidden_artist), method: :delete,
+        form: { class: "inline", data: { turbo_frame: "_top" } },
+        class: "inline-flex items-center gap-2 pl-1 pr-3 py-1 rounded-full
+                bg-white/[0.04] hover:bg-white/[0.08] border border-white/5
+                text-sm text-neutral-300",
+        title: "Toon #{hidden_artist.name} weer" do %>
+    <% if hidden_artist.image_url.present? %>
+      <%= image_tag hidden_artist.image_url, class: "w-6 h-6 rounded-full object-cover" %>
+    <% else %>
+      <span class="w-6 h-6 rounded-full bg-neutral-700 inline-block"></span>
+    <% end %>
+    <span class="truncate max-w-[10rem]"><%= hidden_artist.name %></span>
+    <span class="text-neutral-500 text-xs">×</span>
+  <% end %>
+</li>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Concert Agenda" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Concert Agenda">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="min-h-screen bg-[#0b0b0f] text-neutral-100 antialiased"
+        style="font-family: 'Inter', system-ui, sans-serif;">
+    <div class="fixed inset-x-0 top-0 h-[420px] pointer-events-none -z-10
+                bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.15),transparent_60%)]"></div>
+
+    <header class="border-b border-white/5 backdrop-blur bg-black/20 sticky top-0 z-20">
+      <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+        <%= link_to root_path, class: "flex items-center gap-2 group" do %>
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 group-hover:bg-emerald-300 transition"></span>
+          <span class="font-semibold tracking-tight">Concert&nbsp;Agenda</span>
+        <% end %>
+        <div class="flex items-center gap-4 text-sm">
+          <% if signed_in? %>
+            <nav class="hidden sm:flex items-center gap-4 text-neutral-400">
+              <%= link_to "Agenda", root_path, class: "hover:text-white transition #{'text-white' if current_page?(root_path)}" %>
+              <%= link_to "Artiesten", artists_path, class: "hover:text-white transition #{'text-white' if current_page?(artists_path)}" %>
+            </nav>
+            <% if current_user.image_url.present? %>
+              <%= image_tag current_user.image_url, class: "w-8 h-8 rounded-full ring-1 ring-white/10" %>
+            <% end %>
+            <%= button_to "Uitloggen", logout_path, method: :delete,
+                  class: "text-neutral-400 hover:text-white transition text-sm",
+                  form: { class: "inline" } %>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+      <% if notice %>
+        <div class="mb-6 rounded-lg bg-emerald-500/10 border border-emerald-500/30 px-4 py-3 text-emerald-200 text-sm"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="mb-6 rounded-lg bg-red-500/10 border border-red-500/30 px-4 py-3 text-red-200 text-sm"><%= alert %></div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>
